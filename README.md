@@ -21,7 +21,7 @@ def chordDiagram(X, ax, colors=None, width=0.1, pad=2, chordwidth=0.7):
     chordwidth : optional
         position of the control points for the chords, controlling the shape of the chords
     """
-    ```
+```
 ## Example
 An example can be found at the end of `matplotlib-chord.py`. Here is what the figure looks like:
 ![](example.png)
