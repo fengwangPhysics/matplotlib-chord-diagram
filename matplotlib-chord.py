@@ -151,6 +151,8 @@ def chordDiagram(X, ax, colors=None, cmap=None, width=0.1, pad=2, chordwidth=0.7
         matplotlib `axes` to show the plot
     colors : optional
         user defined colors in rgb format. Use function hex2rgb() to convert hex color to rgb color. Default: d3.js category10
+    cmap : optional
+        user defined matplotlib color map (name in string). Default: 'rainbow'. 
     width : optional
         width/thickness of the ideogram arc
     pad : optional
@@ -162,20 +164,21 @@ def chordDiagram(X, ax, colors=None, cmap=None, width=0.1, pad=2, chordwidth=0.7
     x = X.sum(axis = 1) # sum over rows
     ax.set_xlim(-1.1, 1.1)
     ax.set_ylim(-1.1, 1.1)
-
-    if colors is None:
-    # use d3.js category10 https://github.com/d3/d3-3.x-api-reference/blob/master/Ordinal-Scales.md#category10
-        if len(x) <= 10:
-            colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
-                      '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
-            colors = [hex2rgb(colors[i]) for i in range(len(x))]
-        else:
-            import matplotlib.pyplot as plt
-            if cmap is None:
-                cm = plt.get_cmap('viridis')
-            else: 
-                cm = plt.get_cmap(cmap) 
-            colors = cm(np.linspace(0,1,len(x)))[:,:3]
+    
+    import matplotlib.pyplot as plt
+    if cmap is not None:
+        cm = plt.get_cmap(cmap) 
+        colors = cm(np.linspace(0,1,len(x)))[:,:3]
+    else:
+        if colors is None:
+        # use d3.js category10 https://github.com/d3/d3-3.x-api-reference/blob/master/Ordinal-Scales.md#category10
+            if len(x) <= 10:
+                colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
+                          '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
+                colors = [hex2rgb(colors[i]) for i in range(len(x))]
+            else:
+                cm = plt.get_cmap('rainbow')
+                colors = cm(np.linspace(0,1,len(x)))[:,:3]
 
     # find position for each start and end
     y = x/np.sum(x).astype(float) * (360 - pad*len(x))
