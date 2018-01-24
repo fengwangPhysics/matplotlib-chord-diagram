@@ -140,7 +140,7 @@ def selfChordArc(start=0, end=60, radius=1.0, chordwidth=0.7, ax=None, color=(1,
         patch = patches.PathPatch(path, facecolor=tuple(color)+(0.5,), edgecolor=tuple(color)+(0.4,), lw=LW)
         ax.add_patch(patch)
 
-def chordDiagram(X, ax, colors=None, cmap=None, width=0.1, pad=2, chordwidth=0.7):
+def chordDiagram(X, ax, colors=None, cmap='rainbow', width=0.1, pad=2, chordwidth=0.7):
     """Plot a chord diagram
 
     Parameters
@@ -166,19 +166,13 @@ def chordDiagram(X, ax, colors=None, cmap=None, width=0.1, pad=2, chordwidth=0.7
     ax.set_ylim(-1.1, 1.1)
     
     import matplotlib.pyplot as plt
-    if cmap is not None:
+    if (len(x) > 10) or (colors is None):
         cm = plt.get_cmap(cmap) 
         colors = cm(np.linspace(0,1,len(x)))[:,:3]
     else:
-        if colors is None:
-        # use d3.js category10 https://github.com/d3/d3-3.x-api-reference/blob/master/Ordinal-Scales.md#category10
-            if len(x) <= 10:
-                colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
-                          '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
-                colors = [hex2rgb(colors[i]) for i in range(len(x))]
-            else:
-                cm = plt.get_cmap('rainbow')
-                colors = cm(np.linspace(0,1,len(x)))[:,:3]
+        colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
+                  '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
+        colors = [hex2rgb(colors[i]) for i in range(len(x))]
 
     # find position for each start and end
     y = x/np.sum(x).astype(float) * (360 - pad*len(x))
