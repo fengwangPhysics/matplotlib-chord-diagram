@@ -140,7 +140,7 @@ def selfChordArc(start=0, end=60, radius=1.0, chordwidth=0.7, ax=None, color=(1,
         patch = patches.PathPatch(path, facecolor=tuple(color)+(0.5,), edgecolor=tuple(color)+(0.4,), lw=LW)
         ax.add_patch(patch)
 
-def chordDiagram(X, ax, colors=None, cmap='rainbow', width=0.1, pad=2, chordwidth=0.7):
+def chordDiagram(X, ax, colors=None, width=0.1, pad=2, chordwidth=0.7):
     """Plot a chord diagram
 
     Parameters
@@ -150,9 +150,7 @@ def chordDiagram(X, ax, colors=None, cmap='rainbow', width=0.1, pad=2, chordwidt
     ax :
         matplotlib `axes` to show the plot
     colors : optional
-        user defined colors in rgb format. Use function hex2rgb() to convert hex color to rgb color. Default: d3.js category10
-    cmap : optional
-        user defined matplotlib color map (name in string). Default: 'rainbow'. 
+        list of user defined colors in rgb format or valid matplotlib colormap string. Use function hex2rgb() to convert hex color to rgb color. Default: d3.js category10
     width : optional
         width/thickness of the ideogram arc
     pad : optional
@@ -165,14 +163,21 @@ def chordDiagram(X, ax, colors=None, cmap='rainbow', width=0.1, pad=2, chordwidt
     ax.set_xlim(-1.1, 1.1)
     ax.set_ylim(-1.1, 1.1)
     
-    import matplotlib.pyplot as plt
-    if (len(x) > 10) or (colors is None):
-        cm = plt.get_cmap(cmap) 
-        colors = cm(np.linspace(0,1,len(x)))[:,:3]
-    else:
+    # First, set default to category10 color list
+    if colors is None:
         colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
                   '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
         colors = [hex2rgb(colors[i]) for i in range(len(x))]
+    
+    # Then, if color is default or a specified list, assert correct length
+    if type(colors) is list:
+        # use the list of colors (and `assert len(colors)==len(x)`)
+        assert len(colors)>=len(x)
+    # If it was a string, compute colormap. 
+    elif type(colors) is str:
+        cm = plt.get_cmap(colors) 
+        colors = cm(np.linspace(0,1,len(x)))[:,:3]
+        
 
     # find position for each start and end
     y = x/np.sum(x).astype(float) * (360 - pad*len(x))
