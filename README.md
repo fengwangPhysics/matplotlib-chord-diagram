@@ -3,7 +3,7 @@ plot chord diagram with matplotlib
 
 ## Main plot function
 ```python
-def chordDiagram(X, ax, colors=None, width=0.1, pad=2, chordwidth=0.7):
+def chordDiagram(X, ax, colors=None, cmap='rainbow', width=0.1, pad=2, chordwidth=0.7):
     """Plot a chord diagram
     
     Parameters
@@ -14,6 +14,8 @@ def chordDiagram(X, ax, colors=None, width=0.1, pad=2, chordwidth=0.7):
         matplotlib `axes` to show the plot
     colors : optional
         user defined colors in rgb format. Use function hex2rgb() to convert hex color to rgb color. Default: d3.js category10
+    cmap : optional
+        user defined matplotlib color map (name in string). Default: 'rainbow'. 
     width : optional
         width/thickness of the ideogram arc
     pad : optional
