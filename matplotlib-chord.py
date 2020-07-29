@@ -24,9 +24,9 @@ def IdeogramArc(start=0, end=60, radius=1.0, width=0.2, ax=None, color=(1,0,0)):
     # https://stackoverflow.com/questions/1734745/how-to-create-circle-with-b%C3%A9zier-curves
     inner = radius*(1-width)
     opt = 4./3. * np.tan((end-start)/ 16.) * radius #16-vertex curves (4 quadratic Beziers which accounts for worst case scenario of 360 degrees)
-    inter1 = start*(3/4)+end*(1/4)
-    inter2 = start*(2/4)+end*(2/4)
-    inter3 = start*(1/4)+end*(3/4)
+    inter1 = start*(3./4.)+end*(1./4.)
+    inter2 = start*(2./4.)+end*(2./4.)
+    inter3 = start*(1./4.)+end*(3./4.)
     verts = [
         polar2xy(radius, start),
         polar2xy(radius, start) + polar2xy(opt, start+0.5*np.pi),
@@ -119,12 +119,12 @@ def ChordArc(start1=0, end1=60, start2=180, end2=240, radius=1.0, chordwidth=0.7
     opt1 = 4./3. * np.tan((end1-start1)/ 16.) * radius #16-vertex curves (4 quadratic Beziers which accounts for worst case scenario of 360 degrees)
     opt2 = 4./3. * np.tan((end2-start2)/ 16.) * radius #16-vertex curves (4 quadratic Beziers which accounts for worst case scenario of 360 degrees)
     rchord = radius * (1-chordwidth)
-    inter11 = start1*(3/4)+end1*(1/4)
-    inter12 = start1*(2/4)+end1*(2/4)
-    inter13 = start1*(1/4)+end1*(3/4)
-    inter21 = start2*(3/4)+end2*(1/4)
-    inter22 = start2*(2/4)+end2*(2/4)
-    inter23 = start2*(1/4)+end2*(3/4)
+    inter11 = start1*(3./4.)+end1*(1./4.)
+    inter12 = start1*(2./4.)+end1*(2./4.)
+    inter13 = start1*(1./4.)+end1*(3./4.)
+    inter21 = start2*(3./4.)+end2*(1./4.)
+    inter22 = start2*(2./4.)+end2*(2./4.)
+    inter23 = start2*(1./4.)+end2*(3./4.)
     verts = [
         polar2xy(radius, start1),
         polar2xy(radius, start1) + polar2xy(opt1, start1+0.5*np.pi),
@@ -218,9 +218,9 @@ def selfChordArc(start=0, end=60, radius=1.0, chordwidth=0.7, ax=None, color=(1,
     start *= np.pi/180.
     end *= np.pi/180.
     opt = 4./3. * np.tan((end-start)/ 16.) * radius #16-vertex curves (4 quadratic Beziers which accounts for worst case scenario of 360 degrees)
-    inter1 = start*(3/4)+end*(1/4)
-    inter2 = start*(2/4)+end*(2/4)
-    inter3 = start*(1/4)+end*(3/4)
+    inter1 = start*(3./4.)+end*(1./4.)
+    inter2 = start*(2./4.)+end*(2./4.)
+    inter3 = start*(1./4.)+end*(3./4.)
     rchord = radius * (1-chordwidth)
     verts = [
         polar2xy(radius, start),
@@ -271,6 +271,7 @@ def selfChordArc(start=0, end=60, radius=1.0, chordwidth=0.7, ax=None, color=(1,
         path = Path(verts, codes)
         patch = patches.PathPatch(path, facecolor=color+(0.5,), edgecolor=color+(0.4,), lw=LW)
         ax.add_patch(patch)
+        
 def chordDiagram(X, ax, colors=None, width=0.1, pad=2, chordwidth=0.7):
     """Plot a chord diagram
 
