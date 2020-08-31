@@ -1,20 +1,31 @@
-###################
-# chord diagram
-import matplotlib.pyplot as plt
-from matplotlib.path import Path
+"""
+Tools to draw a chord diagram in python
+"""
+
+from collections.abc import Sequence
+
 import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+
+from matplotlib.colors import ColorConverter
+from matplotlib.path import Path
 
 import numpy as np
 
+
 LW = 0.3
+
 
 def polar2xy(r, theta):
     return np.array([r*np.cos(theta), r*np.sin(theta)])
 
+
 def hex2rgb(c):
     return np.array(int(c[i:i+2], 16)/256.0 for i in (1, 3 ,5))
 
-def IdeogramArc(start=0, end=60, radius=1.0, width=0.2, ax=None, color=(1,0,0)):
+
+def IdeogramArc(start=0, end=60, radius=1.0, width=0.2, ax=None, color=(1,0,0),
+                alpha=0.7):
     # start, end should be in [0, 360)
     if start > end:
         start, end = end, start
@@ -98,15 +109,16 @@ def IdeogramArc(start=0, end=60, radius=1.0, width=0.2, ax=None, color=(1,0,0)):
              Path.CLOSEPOLY,
              ]
 
-    if ax == None:
-        return verts, codes
-    else:
-        path = Path(verts, codes)
-        patch = patches.PathPatch(path, facecolor=tuple(color)+(0.5,), edgecolor=tuple(color)+(0.4,), lw=LW)
+    if ax is not None:
+        path  = Path(verts, codes)
+        patch = patches.PathPatch(path, facecolor=tuple(color) + (alpha,),
+                                  edgecolor=tuple(color) + (alpha,), lw=LW)
         ax.add_patch(patch)
 
+    return verts, codes
 
-def ChordArc(start1=0, end1=60, start2=180, end2=240, radius=1.0, chordwidth=0.7, ax=None, color=(1,0,0)):
+
+def ChordArc(start1=0, end1=60, start2=180, end2=240, radius=1.0, chordwidth=0.7, ax=None, color=(1,0,0), alpha=0.7):
     # start, end should be in [0, 360)
     if start1 > end1:
         start1, end1 = end1, start1
@@ -204,14 +216,16 @@ def ChordArc(start1=0, end1=60, start2=180, end2=240, radius=1.0, chordwidth=0.7
              Path.CURVE4,
              ]
 
-    if ax == None:
-        return verts, codes
-    else:
+    if ax is not None:
         path = Path(verts, codes)
-        patch = patches.PathPatch(path, facecolor=tuple(color)+(0.5,), edgecolor=tuple(color)+(0.4,), lw=LW)
+        patch = patches.PathPatch(path, facecolor=tuple(color)+(alpha,),
+                                  edgecolor=tuple(color)+(alpha,), lw=LW)
         ax.add_patch(patch)
 
-def selfChordArc(start=0, end=60, radius=1.0, chordwidth=0.7, ax=None, color=(1,0,0)):
+    return verts, codes
+
+
+def selfChordArc(start=0, end=60, radius=1.0, chordwidth=0.7, ax=None, color=(1,0,0), alpha=0.7):
     # start, end should be in [0, 360)
     if start > end:
         start, end = end, start
@@ -265,110 +279,151 @@ def selfChordArc(start=0, end=60, radius=1.0, chordwidth=0.7, ax=None, color=(1,
              Path.CURVE4,
              ]
 
-    if ax == None:
-        return verts, codes
-    else:
+    if ax is not None:
         path = Path(verts, codes)
-        patch = patches.PathPatch(path, facecolor=tuple(color)+(0.5,), edgecolor=tuple(color)+(0.4,), lw=LW)
+        patch = patches.PathPatch(path, facecolor=tuple(color)+(alpha,),
+                                  edgecolor=tuple(color)+(alpha,), lw=LW)
         ax.add_patch(patch)
-        
-def chordDiagram(X, ax, colors=None, width=0.1, pad=2, chordwidth=0.7):
-    """Plot a chord diagram
+
+    return verts, codes
+
+
+def chordDiagram(X, width=0.1, pad=2., chordwidth=0.7, colors=None,
+                 cmap=None, alpha=0.7, ax=None):
+    """
+    Plot a chord diagram.
 
     Parameters
     ----------
-    X :
-        flux data, X[i, j] is the flux from i to j
-    ax :
-        matplotlib `axes` to show the plot
-    colors : optional
-        list of user defined colors in rgb format or valid matplotlib colormap string. Use function hex2rgb() to convert hex color to rgb color. Default: d3.js category10
-    width : optional
-        width/thickness of the ideogram arc
-    pad : optional
-        gap pad between two neighboring ideogram arcs, unit: degree, default: 2 degree
-    chordwidth : optional
-        position of the control points for the chords, controlling the shape of the chords
+    X : square matrix
+        Flux data, X[i, j] is the flux from i to j
+    width : float, optional (default: 0.1)
+        Width/thickness of the ideogram arc.
+    pad : float, optional (default: 2)
+        Gap pad between two neighboring ideogram arcs. Unit: degree.
+    chordwidth : float, optional (default: 0.7)
+        Position of the control points for the chords, controlling their shape.
+    colors : list, optional (default: from `cmap`)
+        List of user defined colors or floats.
+    cmap : str or colormap object (default: viridis)
+        Colormap to use.
+    alpha : float in [0, 1], optional (default: 0.7)
+        Opacity of the chord diagram.
+    ax : matplotlib axis, optional (default: new axis)
+        Matplotlib axis where the plot should be drawn.
     """
+    import matplotlib.pyplot as plt
+
+    if ax is None:
+        _, ax = plt.subplots()
+
     # X[i, j]:  i -> j
+    num_nodes = len(X)
+
     x = X.sum(axis = 1) # sum over rows
     ax.set_xlim(-1.1, 1.1)
     ax.set_ylim(-1.1, 1.1)
     
-    # First, set default to category10 color list
+    # First, set default to viridis color list
     if colors is None:
-        colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
-                  '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
-        colors = [hex2rgb(colors[i]) for i in range(len(x))]
-    
-    # Then, if color is default or a specified list, assert correct length
-    if type(colors) is list:
-        # use the list of colors (and `assert len(colors)==len(x)`)
-        assert len(colors)>=len(x)
-    # If it was a string, compute colormap. 
-    elif type(colors) is str:
-        cm = plt.get_cmap(colors) 
-        colors = cm(np.linspace(0,1,len(x)))[:,:3]
-        
+        colors = np.linspace(0, 1, num_nodes)
+
+    if cmap is None:
+        cmap = "viridis"
+
+    if isinstance(colors, (Sequence, np.ndarray)):
+        assert len(colors) == num_nodes, "One color per node is required."
+
+        # check color type
+        first_color = colors[0]
+
+        if isinstance(first_color, (int, float, np.integer)):
+            cm = plt.get_cmap(cmap)
+            colors = cm(colors)[:, :3]
+        else:
+            colors = [ColorConverter.to_rgb(c) for c in colors]
+    else:
+        raise ValueError("`colors` should be a list.")
 
     # find position for each start and end
-    y = x/np.sum(x).astype(float) * (360 - pad*len(x))
+    y = x / np.sum(x).astype(float) * (360 - pad*len(x))
 
     pos = {}
     arc = []
     nodePos = []
     start = 0
+
     for i in range(len(x)):
         end = start + y[i]
         arc.append((start, end))
         angle = 0.5*(start+end)
-        #print(start, end, angle)
+
         if -30 <= angle <= 210:
             angle -= 90
         else:
             angle -= 270
-        nodePos.append(tuple(polar2xy(1.1, 0.5*(start+end)*np.pi/180.)) + (angle,))
-        z = (X[i, :]/x[i].astype(float)) * (end - start)
+
+        nodePos.append(
+            tuple(polar2xy(1.1, 0.5*(start + end)*np.pi/180.)) + (angle,))
+
+        z = (X[i, :] / x[i].astype(float)) * (end - start)
+
         ids = np.argsort(z)
+
         z0 = start
+
         for j in ids:
             pos[(i, j)] = (z0, z0+z[j])
             z0 += z[j]
+
         start = end + pad
 
     for i in range(len(x)):
         start, end = arc[i]
-        IdeogramArc(start=start, end=end, radius=1.0, ax=ax, color=colors[i], width=width)
+
+        IdeogramArc(start=start, end=end, radius=1.0, color=colors[i],
+                    width=width, alpha=alpha, ax=ax)
+
         start, end = pos[(i,i)]
-        selfChordArc(start, end, radius=1.-width, color=colors[i], chordwidth=chordwidth*0.7, ax=ax)
+
+        selfChordArc(start, end, radius=1 - width, chordwidth=chordwidth*0.7,
+                     color=colors[i], alpha=alpha, ax=ax)
+
         for j in range(i):
             color = colors[i]
+
             if X[i, j] > X[j, i]:
                 color = colors[j]
+
             start1, end1 = pos[(i,j)]
             start2, end2 = pos[(j,i)]
-            ChordArc(start1, end1, start2, end2,
-                     radius=1.-width, color=colors[i], chordwidth=chordwidth, ax=ax)
 
-    #print(nodePos)
+            ChordArc(start1, end1, start2, end2, radius=1 - width,
+                     chordwidth=chordwidth, color=colors[i], alpha=alpha,
+                     ax=ax)
+
+    # configure axis
+    ax.set_aspect(1)
+    ax.axis('off')
+    plt.tight_layout()
+
     return nodePos
 
-##################################
+
 if __name__ == "__main__":
-    fig = plt.figure(figsize=(6,6))
     flux = np.array([[11975,  5871, 8916, 2868],
       [ 1951, 10048, 2060, 6171],
       [ 8010, 16145, 81090, 8045],
       [ 1013,   990,  940, 6907]
     ])
 
-    ax = plt.axes([0,0,1,1])
+    _, ax = plt.subplots(figsize=(6, 6))
 
-    #nodePos = chordDiagram(flux, ax, colors=[hex2rgb(x) for x in ['#666666', '#66ff66', '#ff6666', '#6666ff']])
-    nodePos = chordDiagram(flux, ax)
-    ax.axis('off')
+    nodePos = chordDiagram(flux, ax=ax)
+    
     prop = dict(fontsize=16*0.8, ha='center', va='center')
     nodes = ['non-crystal', 'FCC', 'HCP', 'BCC']
+
     for i in range(4):
         ax.text(nodePos[i][0], nodePos[i][1], nodes[i], rotation=nodePos[i][2], **prop)
 
@@ -376,3 +431,4 @@ if __name__ == "__main__":
             transparent=True,
             bbox_inches='tight', pad_inches=0.02)
 
+    plt.show()

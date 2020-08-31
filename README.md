@@ -6,26 +6,29 @@ Plot chord diagram with [matplotlib](https://matplotlib.org).
 ## Main plot function
 
 ```python
-def chordDiagram(X, ax, colors=None, cmap='rainbow', width=0.1, pad=2, chordwidth=0.7):
+def chordDiagram(X, width=0.1, pad=2., chordwidth=0.7, colors=None,
+                 cmap=None, alpha=0.7, ax=None):
     """
-    Plot a chord diagram
-    
+    Plot a chord diagram.
+
     Parameters
     ----------
-    X :
-        flux data, X[i, j] is the flux from i to j
-    ax :
-        matplotlib `axes` to show the plot
-    colors : optional
-        user defined colors in rgb format. Use function hex2rgb() to convert hex color to rgb color. Default: d3.js category10
-    cmap : optional
-        user defined matplotlib color map (name in string). Default: 'rainbow'. 
-    width : optional
-        width/thickness of the ideogram arc
-    pad : optional
-        gap pad between two neighboring ideogram arcs, unit: degree, default: 2 degree
-    chordwidth : optional
-        position of the control points for the chords, controlling the shape of the chords
+    X : square matrix
+        Flux data, X[i, j] is the flux from i to j
+    width : float, optional (default: 0.1)
+        Width/thickness of the ideogram arc.
+    pad : float, optional (default: 2)
+        Gap pad between two neighboring ideogram arcs. Unit: degree.
+    chordwidth : float, optional (default: 0.7)
+        Position of the control points for the chords, controlling their shape.
+    colors : list, optional (default: from `cmap`)
+        List of user defined colors or floats.
+    cmap : str or colormap object (default: viridis)
+        Colormap to use.
+    alpha : float in [0, 1], optional (default: 0.7)
+        Opacity of the chord diagram.
+    ax : matplotlib axis, optional (default: new axis)
+        Matplotlib axis where the plot should be drawn.
     """
 ```
 
@@ -33,7 +36,7 @@ def chordDiagram(X, ax, colors=None, cmap='rainbow', width=0.1, pad=2, chordwidt
 
 An example can be found at the end of `matplotlib-chord.py`.
 Here is what the figure looks like:
-![](example_large_new.png)
+![](example.png)
 
 
 ## Contributors
