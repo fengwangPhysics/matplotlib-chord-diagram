@@ -3,6 +3,7 @@ Create linear color gradients
 """
 
 from matplotlib.colors import ColorConverter, LinearSegmentedColormap
+from scipy.ndimage import gaussian_filter
 
 import numpy as np
 
@@ -19,7 +20,8 @@ def linear_gradient(cstart, cend, n=10):
     return rgb_list
 
 
-def gradient(start, end, color1, color2, meshgrid, mask, ax, alpha):
+def gradient(start, end, min_angle, color1, color2, meshgrid, mask, ax,
+             alpha):
     '''
     Create a linear gradient from `start` to `end`, which is translationally
     invarient in the orthogonal direction.
@@ -28,23 +30,21 @@ def gradient(start, end, color1, color2, meshgrid, mask, ax, alpha):
     xs, ys = start
     xe, ye = end
 
-    Z = None
-
     X, Y = meshgrid
 
-    # get the orthogonal projection of each point on the gradient start line
-    if np.isclose(ye, ys):
-        Z = np.clip((X - xs) / (xe - xs), 0, 1)
-    else:
-        Yh = ys
+    # get the distance to each point
+    d2start = (X - xs)*(X - xs) + (Y - ys)*(Y - ys)
+    d2end   = (X - xe)*(X - xe) + (Y - ye)*(Y - ye)
 
-        if not np.isclose(xe, xs):
-            norm = np.sqrt((ye-ys)*(ye-ys) / ((xe-xs)*(xe-xs)) + 1)
+    dmax = (xs - xe)*(xs - xe) + (ys - ye)*(ys - ye)
 
-            Yh = ys + ((ys - ye)*(X - xs)/(xe - xs) + (Y - ys)) / norm
+    # blur
+    smin = 0.015*len(X)
+    smax = max(smin, 0.1*len(X)*min(min_angle/120, 1))
 
-        # generate the image, varying from 0 to 1
-        Z = np.clip((Y - Yh) / (ye - ys), 0, 1)
+    sigma = np.clip(dmax*len(X), smin, smax)
+
+    Z = gaussian_filter((d2end < d2start).astype(float), sigma=sigma)
 
     # generate the colormap
     n_bin = 100

@@ -38,7 +38,8 @@ def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0., chordwidth=0.7,
         Whether a gradient should be use so that chord extremities have the
         same color as the arc they belong to.
     **kwargs : keyword arguments
-        Available kwargs are "fontsize".
+        Available kwargs are "fontsize" and "sort" (either "size" or
+        "distance").
     """
 ```
 
@@ -46,9 +47,11 @@ def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0., chordwidth=0.7,
 
 An example can be found at the end of `matplotlib-chord.py`.
 Here is what the diagrams look like (left and right are respectively with and
-without gradient and gap):
+without gradient and gap, up and down are respectively sorted by domain size
+or distance):
 
-<img src="example.png" width="390" alt="Chord diagram without gradient"><img src="example_gradient.png" width="390" alt="Chord diagram without gradient">
+<img src="example_sort-size.png" width="390" alt="Chord diagram without gradient, sorted by size"><img src="example_gradient_sort-size.png" width="390" alt="Chord diagram without gradient, sorted by size">
+<img src="example_sort-distance.png" width="390" alt="Chord diagram without gradient, sorted by distance"><img src="example_gradient_sort-distance.png" width="390" alt="Chord diagram without gradient, dorted by distance">
 
 
 ## Contributors
