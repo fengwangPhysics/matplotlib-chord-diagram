@@ -7,7 +7,7 @@ Plot chord diagram with [matplotlib](https://matplotlib.org).
 
 ```python
 def chordDiagram(X, width=0.1, pad=2., chordwidth=0.7, colors=None,
-                 cmap=None, alpha=0.7, ax=None):
+                 cmap=None, alpha=0.7, ax=None, use_gradient=False):
     """
     Plot a chord diagram.
 
@@ -29,14 +29,18 @@ def chordDiagram(X, width=0.1, pad=2., chordwidth=0.7, colors=None,
         Opacity of the chord diagram.
     ax : matplotlib axis, optional (default: new axis)
         Matplotlib axis where the plot should be drawn.
+    use_gradient : bool, optional (default: False)
+        Whether a gradient should be use so that chord extremities have the
+        same color as the arc they belong to.
     """
 ```
 
 ## Example
 
 An example can be found at the end of `matplotlib-chord.py`.
-Here is what the figure looks like:
-![](example.png)
+Here is what the figures look like:
+
+<img src="example.png" width="390"><img src="example_gradient.png" width="390">
 
 
 ## Contributors

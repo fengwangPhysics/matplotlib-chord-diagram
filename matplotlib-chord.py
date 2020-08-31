@@ -7,13 +7,76 @@ from collections.abc import Sequence
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 
-from matplotlib.colors import ColorConverter
+from matplotlib.colors import ColorConverter, LinearSegmentedColormap
 from matplotlib.path import Path
 
 import numpy as np
 
 
 LW = 0.3
+
+
+def dist(points):
+    x1, y1 = points[0]
+    x2, y2 = points[1]
+
+    return np.sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1))
+
+
+def linear_gradient(cstart, cend, n=10):
+    '''
+    Return a gradient list of `n` colors going from `cstart` to `cend`.
+    '''
+    s = np.array(ColorConverter.to_rgb(cstart))
+    f = np.array(ColorConverter.to_rgb(cend))
+
+    rgb_list = [s + (t / (n - 1))*(f - s) for t in range(n)]
+
+    return rgb_list
+
+
+def gradient(start, end, color1, color2, meshgrid, mask, ax, alpha):
+    '''
+    Create a linear gradient from `start` to `end`, which is translationally
+    invarient in the orthogonal direction.
+    The gradient is then cliped by the mask.
+    '''
+    xs, ys = start
+    xe, ye = end
+
+    Z = None
+
+    X, Y = meshgrid
+
+    # get the orthogonal projection of each point on the gradient start line
+    if np.isclose(ye, ys):
+        Z = np.clip((X - xs) / (xe - xs), 0, 1)
+    else:
+        Yh = ys
+
+        if not np.isclose(xe, xs):
+            norm = np.sqrt((ye-ys)*(ye-ys) / ((xe-xs)*(xe-xs)) + 1)
+
+            Yh = ys + ((ys - ye)*(X - xs)/(xe - xs) + (Y - ys)) / norm
+
+        # generate the image, varying from 0 to 1
+        Z = np.clip((Y - Yh) / (ye - ys), 0, 1)
+
+    # generate the colormap
+    n_bin = 100
+
+    color_list = linear_gradient(color1, color2, n_bin)
+
+    cmap = LinearSegmentedColormap.from_list("gradient", color_list, N=n_bin)
+
+    im = ax.imshow(Z, interpolation='bilinear', cmap=cmap,
+                   origin='lower', extent=[-1, 1, -1, 1],
+                   clip_path=mask, clip_on=True, alpha=alpha)
+
+    # ~ im = ax.imshow(Z, interpolation='bilinear', cmap=cmap,
+                   # ~ origin='lower', extent=[-1, 1, -1, 1], alpha=alpha)
+
+    im.set_clip_path(mask)
 
 
 def polar2xy(r, theta):
@@ -118,7 +181,9 @@ def IdeogramArc(start=0, end=60, radius=1.0, width=0.2, ax=None, color=(1,0,0),
     return verts, codes
 
 
-def ChordArc(start1=0, end1=60, start2=180, end2=240, radius=1.0, chordwidth=0.7, ax=None, color=(1,0,0), alpha=0.7):
+def ChordArc(start1=0, end1=60, start2=180, end2=240, radius=1.0,
+             chordwidth=0.7, ax=None, color="r", cend="r", alpha=0.7,
+             use_gradient=False):
     # start, end should be in [0, 360)
     if start1 > end1:
         start1, end1 = end1, start1
@@ -218,9 +283,30 @@ def ChordArc(start1=0, end1=60, start2=180, end2=240, radius=1.0, chordwidth=0.7
 
     if ax is not None:
         path = Path(verts, codes)
-        patch = patches.PathPatch(path, facecolor=tuple(color)+(alpha,),
-                                  edgecolor=tuple(color)+(alpha,), lw=LW)
-        ax.add_patch(patch)
+
+        if use_gradient:
+            # find the start and end points of the gradient
+            p0 = np.array([verts[0], verts[-4]])
+            p1 = np.array([verts[15], verts[18]])
+
+            points = p0 if dist(p0) < dist(p1) else p1
+
+            # make the patch
+            patch = patches.PathPatch(path, facecolor="none",
+                                      edgecolor="none", lw=LW)
+            ax.add_patch(patch)  # this is required to clip the gradient
+
+            # make the grid
+            x = y = np.linspace(-1, 1, 50)
+            meshgrid = np.meshgrid(x, y)
+
+            gradient(points[0], points[1], color, cend, meshgrid, patch, ax,
+                     alpha)
+        else:
+            patch = patches.PathPatch(path, facecolor=tuple(color)+(alpha,),
+                                      edgecolor=tuple(color)+(alpha,), lw=LW)
+
+            ax.add_patch(patch)
 
     return verts, codes
 
@@ -289,7 +375,7 @@ def selfChordArc(start=0, end=60, radius=1.0, chordwidth=0.7, ax=None, color=(1,
 
 
 def chordDiagram(X, width=0.1, pad=2., chordwidth=0.7, colors=None,
-                 cmap=None, alpha=0.7, ax=None):
+                 cmap=None, alpha=0.7, ax=None, use_gradient=False):
     """
     Plot a chord diagram.
 
@@ -311,6 +397,9 @@ def chordDiagram(X, width=0.1, pad=2., chordwidth=0.7, colors=None,
         Opacity of the chord diagram.
     ax : matplotlib axis, optional (default: new axis)
         Matplotlib axis where the plot should be drawn.
+    use_gradient : bool, optional (default: False)
+        Whether a gradient should be use so that chord extremities have the
+        same color as the arc they belong to.
     """
     import matplotlib.pyplot as plt
 
@@ -389,18 +478,17 @@ def chordDiagram(X, width=0.1, pad=2., chordwidth=0.7, colors=None,
         selfChordArc(start, end, radius=1 - width, chordwidth=chordwidth*0.7,
                      color=colors[i], alpha=alpha, ax=ax)
 
-        for j in range(i):
-            color = colors[i]
+        color = colors[i]
 
-            if X[i, j] > X[j, i]:
-                color = colors[j]
+        for j in range(i):
+            cend = colors[j]
 
             start1, end1 = pos[(i,j)]
             start2, end2 = pos[(j,i)]
 
             ChordArc(start1, end1, start2, end2, radius=1 - width,
-                     chordwidth=chordwidth, color=colors[i], alpha=alpha,
-                     ax=ax)
+                     chordwidth=chordwidth, color=colors[i], cend=cend, alpha=alpha,
+                     ax=ax, use_gradient=use_gradient)
 
     # configure axis
     ax.set_aspect(1)
@@ -417,18 +505,20 @@ if __name__ == "__main__":
       [ 1013,   990,  940, 6907]
     ])
 
-    _, ax = plt.subplots(figsize=(6, 6))
+    for grd in (True, False):
+        _, ax = plt.subplots(figsize=(6, 6))
 
-    nodePos = chordDiagram(flux, ax=ax)
-    
-    prop = dict(fontsize=16*0.8, ha='center', va='center')
-    nodes = ['non-crystal', 'FCC', 'HCP', 'BCC']
+        nodePos = chordDiagram(flux, ax=ax, use_gradient=grd)
+        
+        prop = dict(fontsize=16*0.8, ha='center', va='center')
+        nodes = ['non-crystal', 'FCC', 'HCP', 'BCC']
 
-    for i in range(4):
-        ax.text(nodePos[i][0], nodePos[i][1], nodes[i], rotation=nodePos[i][2], **prop)
+        for i in range(len(flux)):
+            ax.text(nodePos[i][0], nodePos[i][1], nodes[i],
+                    rotation=nodePos[i][2], **prop)
 
-    plt.savefig("example.png", dpi=600,
-            transparent=True,
-            bbox_inches='tight', pad_inches=0.02)
+        plt.savefig("example{}.png".format("_gradient" if grd else ""),
+                    dpi=600, transparent=True, bbox_inches='tight',
+                    pad_inches=0.02)
 
     plt.show()
