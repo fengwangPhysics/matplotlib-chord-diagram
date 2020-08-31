@@ -24,6 +24,22 @@ def chordDiagram(X, ax, colors=None, cmap='rainbow', width=0.1, pad=2, chordwidt
         position of the control points for the chords, controlling the shape of the chords
     """
 ```
+
 ## Example
 An example can be found at the end of `matplotlib-chord.py`. Here is what the figure looks like:
-![](example.png)
+![](example_large_new.png)
+
+
+## Improvements
+Fixes inaccurate circle plotting caused by too few vertices on the Bézier curves. This effect becomes visible when arc lengths exceed 90 degrees, but gets much worse when arc lengths exceed 180 degrees. 
+
+Vertex count has been quadrupled, using four curves on each arc to ensure plotting remains accurate even with long arcs within the dataset.
+
+## Comparison
+The effect is visible even with the default arc lengths. 
+
+<img src="example_old.png" width="390" height="375"><img src="example_new.png" width="390" height="375">
+
+The effect is much worse with arcs above 180 degrees in length, like in the example image. 
+
+<img src="example_large_old.png" width="393" height="380"><img src="example_large_new.png" width="393" height="380">

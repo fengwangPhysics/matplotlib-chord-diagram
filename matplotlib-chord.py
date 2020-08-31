@@ -22,21 +22,72 @@ def IdeogramArc(start=0, end=60, radius=1.0, width=0.2, ax=None, color=(1,0,0)):
     end *= np.pi/180.
     # optimal distance to the control points
     # https://stackoverflow.com/questions/1734745/how-to-create-circle-with-b%C3%A9zier-curves
-    opt = 4./3. * np.tan((end-start)/ 4.) * radius
     inner = radius*(1-width)
+    opt = 4./3. * np.tan((end-start)/ 16.) * radius #16-vertex curves (4 quadratic Beziers which accounts for worst case scenario of 360 degrees)
+    inter1 = start*(3./4.)+end*(1./4.)
+    inter2 = start*(2./4.)+end*(2./4.)
+    inter3 = start*(1./4.)+end*(3./4.)
     verts = [
         polar2xy(radius, start),
         polar2xy(radius, start) + polar2xy(opt, start+0.5*np.pi),
+        polar2xy(radius, inter1) + polar2xy(opt, inter1-0.5*np.pi),
+        polar2xy(radius, inter1),
+        polar2xy(radius, inter1),
+        polar2xy(radius, inter1) + polar2xy(opt, inter1+0.5*np.pi),
+        polar2xy(radius, inter2) + polar2xy(opt, inter2-0.5*np.pi),
+        polar2xy(radius, inter2),
+        polar2xy(radius, inter2),
+        polar2xy(radius, inter2) + polar2xy(opt, inter2+0.5*np.pi),
+        polar2xy(radius, inter3) + polar2xy(opt, inter3-0.5*np.pi),
+        polar2xy(radius, inter3),
+        polar2xy(radius, inter3),
+        polar2xy(radius, inter3) + polar2xy(opt, inter3+0.5*np.pi),
         polar2xy(radius, end) + polar2xy(opt, end-0.5*np.pi),
         polar2xy(radius, end),
         polar2xy(inner, end),
         polar2xy(inner, end) + polar2xy(opt*(1-width), end-0.5*np.pi),
+        polar2xy(inner, inter3) + polar2xy(opt*(1-width), inter3+0.5*np.pi),
+        polar2xy(inner, inter3),
+        polar2xy(inner, inter3),
+        polar2xy(inner, inter3) + polar2xy(opt*(1-width), inter3-0.5*np.pi),
+        polar2xy(inner, inter2) + polar2xy(opt*(1-width), inter2+0.5*np.pi),
+        polar2xy(inner, inter2),
+        polar2xy(inner, inter2),
+        polar2xy(inner, inter2) + polar2xy(opt*(1-width), inter2-0.5*np.pi),
+        polar2xy(inner, inter1) + polar2xy(opt*(1-width), inter1+0.5*np.pi),
+        polar2xy(inner, inter1),
+        polar2xy(inner, inter1),
+        polar2xy(inner, inter1) + polar2xy(opt*(1-width), inter1-0.5*np.pi),
         polar2xy(inner, start) + polar2xy(opt*(1-width), start+0.5*np.pi),
         polar2xy(inner, start),
         polar2xy(radius, start),
         ]
 
     codes = [Path.MOVETO,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.LINETO,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.LINETO,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.LINETO,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.LINETO,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.LINETO,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.LINETO,
              Path.CURVE4,
              Path.CURVE4,
              Path.CURVE4,
@@ -65,18 +116,48 @@ def ChordArc(start1=0, end1=60, start2=180, end2=240, radius=1.0, chordwidth=0.7
     end1 *= np.pi/180.
     start2 *= np.pi/180.
     end2 *= np.pi/180.
-    opt1 = 4./3. * np.tan((end1-start1)/ 4.) * radius
-    opt2 = 4./3. * np.tan((end2-start2)/ 4.) * radius
+    opt1 = 4./3. * np.tan((end1-start1)/ 16.) * radius #16-vertex curves (4 quadratic Beziers which accounts for worst case scenario of 360 degrees)
+    opt2 = 4./3. * np.tan((end2-start2)/ 16.) * radius #16-vertex curves (4 quadratic Beziers which accounts for worst case scenario of 360 degrees)
     rchord = radius * (1-chordwidth)
+    inter11 = start1*(3./4.)+end1*(1./4.)
+    inter12 = start1*(2./4.)+end1*(2./4.)
+    inter13 = start1*(1./4.)+end1*(3./4.)
+    inter21 = start2*(3./4.)+end2*(1./4.)
+    inter22 = start2*(2./4.)+end2*(2./4.)
+    inter23 = start2*(1./4.)+end2*(3./4.)
     verts = [
         polar2xy(radius, start1),
         polar2xy(radius, start1) + polar2xy(opt1, start1+0.5*np.pi),
+        polar2xy(radius, inter11) + polar2xy(opt1, inter11-0.5*np.pi),
+        polar2xy(radius, inter11),
+        polar2xy(radius, inter11),
+        polar2xy(radius, inter11) + polar2xy(opt1, inter11+0.5*np.pi),
+        polar2xy(radius, inter12) + polar2xy(opt1, inter12-0.5*np.pi),
+        polar2xy(radius, inter12),
+        polar2xy(radius, inter12),
+        polar2xy(radius, inter12) + polar2xy(opt1, inter12+0.5*np.pi),
+        polar2xy(radius, inter13) + polar2xy(opt1, inter13-0.5*np.pi),
+        polar2xy(radius, inter13),
+        polar2xy(radius, inter13),
+        polar2xy(radius, inter13) + polar2xy(opt1, inter13+0.5*np.pi),
         polar2xy(radius, end1) + polar2xy(opt1, end1-0.5*np.pi),
         polar2xy(radius, end1),
         polar2xy(rchord, end1),
         polar2xy(rchord, start2),
         polar2xy(radius, start2),
         polar2xy(radius, start2) + polar2xy(opt2, start2+0.5*np.pi),
+        polar2xy(radius, inter21) + polar2xy(opt2, inter21-0.5*np.pi),
+        polar2xy(radius, inter21),
+        polar2xy(radius, inter21),
+        polar2xy(radius, inter21) + polar2xy(opt2, inter21+0.5*np.pi),
+        polar2xy(radius, inter22) + polar2xy(opt2, inter22-0.5*np.pi),
+        polar2xy(radius, inter22),
+        polar2xy(radius, inter22),
+        polar2xy(radius, inter22) + polar2xy(opt2, inter22+0.5*np.pi),
+        polar2xy(radius, inter23) + polar2xy(opt2, inter23-0.5*np.pi),
+        polar2xy(radius, inter23),
+        polar2xy(radius, inter23),
+        polar2xy(radius, inter23) + polar2xy(opt2, inter23+0.5*np.pi),
         polar2xy(radius, end2) + polar2xy(opt2, end2-0.5*np.pi),
         polar2xy(radius, end2),
         polar2xy(rchord, end2),
@@ -88,9 +169,33 @@ def ChordArc(start1=0, end1=60, start2=180, end2=240, radius=1.0, chordwidth=0.7
              Path.CURVE4,
              Path.CURVE4,
              Path.CURVE4,
+             Path.LINETO,
              Path.CURVE4,
              Path.CURVE4,
              Path.CURVE4,
+             Path.LINETO,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.LINETO,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.LINETO,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.LINETO,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.LINETO,
              Path.CURVE4,
              Path.CURVE4,
              Path.CURVE4,
@@ -112,11 +217,26 @@ def selfChordArc(start=0, end=60, radius=1.0, chordwidth=0.7, ax=None, color=(1,
         start, end = end, start
     start *= np.pi/180.
     end *= np.pi/180.
-    opt = 4./3. * np.tan((end-start)/ 4.) * radius
+    opt = 4./3. * np.tan((end-start)/ 16.) * radius #16-vertex curves (4 quadratic Beziers which accounts for worst case scenario of 360 degrees)
+    inter1 = start*(3./4.)+end*(1./4.)
+    inter2 = start*(2./4.)+end*(2./4.)
+    inter3 = start*(1./4.)+end*(3./4.)
     rchord = radius * (1-chordwidth)
     verts = [
         polar2xy(radius, start),
         polar2xy(radius, start) + polar2xy(opt, start+0.5*np.pi),
+        polar2xy(radius, inter1) + polar2xy(opt, inter1-0.5*np.pi),
+        polar2xy(radius, inter1),
+        polar2xy(radius, inter1),
+        polar2xy(radius, inter1) + polar2xy(opt, inter1+0.5*np.pi),
+        polar2xy(radius, inter2) + polar2xy(opt, inter2-0.5*np.pi),
+        polar2xy(radius, inter2),
+        polar2xy(radius, inter2),
+        polar2xy(radius, inter2) + polar2xy(opt, inter2+0.5*np.pi),
+        polar2xy(radius, inter3) + polar2xy(opt, inter3-0.5*np.pi),
+        polar2xy(radius, inter3),
+        polar2xy(radius, inter3),
+        polar2xy(radius, inter3) + polar2xy(opt, inter3+0.5*np.pi),
         polar2xy(radius, end) + polar2xy(opt, end-0.5*np.pi),
         polar2xy(radius, end),
         polar2xy(rchord, end),
@@ -125,6 +245,18 @@ def selfChordArc(start=0, end=60, radius=1.0, chordwidth=0.7, ax=None, color=(1,
         ]
 
     codes = [Path.MOVETO,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.LINETO,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.LINETO,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.CURVE4,
+             Path.LINETO,
              Path.CURVE4,
              Path.CURVE4,
              Path.CURVE4,
@@ -139,7 +271,7 @@ def selfChordArc(start=0, end=60, radius=1.0, chordwidth=0.7, ax=None, color=(1,
         path = Path(verts, codes)
         patch = patches.PathPatch(path, facecolor=tuple(color)+(0.5,), edgecolor=tuple(color)+(0.4,), lw=LW)
         ax.add_patch(patch)
-
+        
 def chordDiagram(X, ax, colors=None, width=0.1, pad=2, chordwidth=0.7):
     """Plot a chord diagram
 
@@ -226,7 +358,7 @@ if __name__ == "__main__":
     fig = plt.figure(figsize=(6,6))
     flux = np.array([[11975,  5871, 8916, 2868],
       [ 1951, 10048, 2060, 6171],
-      [ 8010, 16145, 8090, 8045],
+      [ 8010, 16145, 81090, 8045],
       [ 1013,   990,  940, 6907]
     ])
 
