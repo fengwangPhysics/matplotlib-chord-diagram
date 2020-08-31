@@ -12,7 +12,7 @@ def polar2xy(r, theta):
     return np.array([r*np.cos(theta), r*np.sin(theta)])
 
 def hex2rgb(c):
-    return tuple(int(c[i:i+2], 16)/256.0 for i in (1, 3 ,5))
+    return np.array(int(c[i:i+2], 16)/256.0 for i in (1, 3 ,5))
 
 def IdeogramArc(start=0, end=60, radius=1.0, width=0.2, ax=None, color=(1,0,0)):
     # start, end should be in [0, 360)
@@ -51,7 +51,7 @@ def IdeogramArc(start=0, end=60, radius=1.0, width=0.2, ax=None, color=(1,0,0)):
         return verts, codes
     else:
         path = Path(verts, codes)
-        patch = patches.PathPatch(path, facecolor=color+(0.5,), edgecolor=color+(0.4,), lw=LW)
+        patch = patches.PathPatch(path, facecolor=tuple(color)+(0.5,), edgecolor=tuple(color)+(0.4,), lw=LW)
         ax.add_patch(patch)
 
 
@@ -103,7 +103,7 @@ def ChordArc(start1=0, end1=60, start2=180, end2=240, radius=1.0, chordwidth=0.7
         return verts, codes
     else:
         path = Path(verts, codes)
-        patch = patches.PathPatch(path, facecolor=color+(0.5,), edgecolor=color+(0.4,), lw=LW)
+        patch = patches.PathPatch(path, facecolor=tuple(color)+(0.5,), edgecolor=tuple(color)+(0.4,), lw=LW)
         ax.add_patch(patch)
 
 def selfChordArc(start=0, end=60, radius=1.0, chordwidth=0.7, ax=None, color=(1,0,0)):
@@ -137,7 +137,7 @@ def selfChordArc(start=0, end=60, radius=1.0, chordwidth=0.7, ax=None, color=(1,
         return verts, codes
     else:
         path = Path(verts, codes)
-        patch = patches.PathPatch(path, facecolor=color+(0.5,), edgecolor=color+(0.4,), lw=LW)
+        patch = patches.PathPatch(path, facecolor=tuple(color)+(0.5,), edgecolor=tuple(color)+(0.4,), lw=LW)
         ax.add_patch(patch)
 
 def chordDiagram(X, ax, colors=None, width=0.1, pad=2, chordwidth=0.7):
@@ -150,7 +150,7 @@ def chordDiagram(X, ax, colors=None, width=0.1, pad=2, chordwidth=0.7):
     ax :
         matplotlib `axes` to show the plot
     colors : optional
-        user defined colors in rgb format. Use function hex2rgb() to convert hex color to rgb color. Default: d3.js category10
+        list of user defined colors in rgb format or valid matplotlib colormap string. Use function hex2rgb() to convert hex color to rgb color. Default: d3.js category10
     width : optional
         width/thickness of the ideogram arc
     pad : optional
@@ -162,14 +162,22 @@ def chordDiagram(X, ax, colors=None, width=0.1, pad=2, chordwidth=0.7):
     x = X.sum(axis = 1) # sum over rows
     ax.set_xlim(-1.1, 1.1)
     ax.set_ylim(-1.1, 1.1)
-
+    
+    # First, set default to category10 color list
     if colors is None:
-    # use d3.js category10 https://github.com/d3/d3-3.x-api-reference/blob/master/Ordinal-Scales.md#category10
         colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
                   '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
-        if len(x) > 10:
-            print('x is too large! Use x smaller than 10')
         colors = [hex2rgb(colors[i]) for i in range(len(x))]
+    
+    # Then, if color is default or a specified list, assert correct length
+    if type(colors) is list:
+        # use the list of colors (and `assert len(colors)==len(x)`)
+        assert len(colors)>=len(x)
+    # If it was a string, compute colormap. 
+    elif type(colors) is str:
+        cm = plt.get_cmap(colors) 
+        colors = cm(np.linspace(0,1,len(x)))[:,:3]
+        
 
     # find position for each start and end
     y = x/np.sum(x).astype(float) * (360 - pad*len(x))
@@ -235,3 +243,4 @@ if __name__ == "__main__":
     plt.savefig("example.png", dpi=600,
             transparent=True,
             bbox_inches='tight', pad_inches=0.02)
+
