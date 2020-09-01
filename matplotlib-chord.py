@@ -358,7 +358,7 @@ def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0., chordwidth=0.7,
         same color as the arc they belong to.
     **kwargs : keyword arguments
         Available kwargs are "fontsize" and "sort" (either "size" or
-        "distance").
+        "distance"), "zero_entry_size" (in degrees, default: 0.5).
     """
     import matplotlib.pyplot as plt
 
@@ -368,12 +368,22 @@ def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0., chordwidth=0.7,
     # mat[i, j]:  i -> j
     num_nodes = len(mat)
 
-    x = mat.sum(axis=1) # sum over rows
+    # copy matrix and set a minimal value for visibility of zero fluxes
+    mat = mat.copy()
 
-    ax.set_xlim(-1.1, 1.1)
-    ax.set_ylim(-1.1, 1.1)
+    min_deg  = kwargs.get("zero_entry_size", 0.5)
+    min_deg *= mat.sum() / (360 - num_nodes*pad)
+
+    zeros = np.argwhere(mat == 0)
+
+    for (i, j) in zeros:
+        if mat[j, i] != 0:
+            mat[i, j] = min_deg
+
+    # sum over rows
+    x = mat.sum(axis=1)
     
-    # First, set default to viridis color list
+    # configure colors
     if colors is None:
         colors = np.linspace(0, 1, num_nodes)
 
@@ -438,7 +448,6 @@ def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0., chordwidth=0.7,
         z0 = start
 
         for j in ids:
-            # ~ if j 
             pos[(i, j)] = (z0, z0 + z[j])
             z0 += z[j]
 
@@ -482,8 +491,12 @@ def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0., chordwidth=0.7,
             ax.text(pos[0], pos[1], name, rotation=pos[2], **prop)
 
     # configure axis
+    ax.set_xlim(-1.1, 1.1)
+    ax.set_ylim(-1.1, 1.1)
+
     ax.set_aspect(1)
     ax.axis('off')
+
     plt.tight_layout()
 
     if show:
