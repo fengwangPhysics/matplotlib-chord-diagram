@@ -90,8 +90,6 @@ def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0., chordwidth=0.7,
     # sum over rows
     x = mat.sum(axis=1).A1 if is_sparse else mat.sum(axis=1)
 
-    print(x)
-
     # configure colors
     if colors is None:
         colors = np.linspace(0, 1, num_nodes)
