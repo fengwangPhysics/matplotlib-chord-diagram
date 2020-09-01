@@ -11,7 +11,7 @@ from matplotlib.path import Path
 
 import numpy as np
 
-from gradient import gradient
+from .gradient import gradient
 
 
 LW = 0.3
@@ -503,29 +503,3 @@ def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0., chordwidth=0.7,
         plt.show()
 
     return nodePos
-
-
-if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-
-    flux = np.array([[11975,  5871, 8916, 2868],
-      [ 1951, 10048, 2060, 6171],
-      [ 8010, 16145, 81090, 8045],
-      [ 1013,   990,  940, 6907]
-    ])
-
-    names = ['non-crystal', 'FCC', 'HCP', 'BCC']
-
-    gradients = (True, False, False, True)
-    gaps = (0.03, 0, 0.03, 0)
-    sorts = ("size", "size", "distance", "distance")
-
-    for grd, gap, sort in zip(gradients, gaps, sorts):
-        chord_diagram(flux, names, gap=gap, use_gradient=grd, sort=sort)
-
-        plt.savefig(
-            "example{}_sort-{}.png".format("_gradient" if grd else "", sort),
-                    dpi=600, transparent=True, bbox_inches='tight',
-                    pad_inches=0.02)
-
-    plt.show()
