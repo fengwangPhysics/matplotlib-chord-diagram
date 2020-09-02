@@ -1,0 +1,6 @@
+# python stuff
+*.pyc
+*/__pycache__
+build/
+dist/
+mpl_chord_diagram.egg-info/

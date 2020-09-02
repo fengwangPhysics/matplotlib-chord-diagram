@@ -19,7 +19,7 @@ from .utilities import _get_normed_line, dist, polar2xy
 LW = 0.3
 
 
-def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0., chordwidth=0.7,
+def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0.03, chordwidth=0.7,
                   ax=None, colors=None, cmap=None, alpha=0.7,
                   use_gradient=False, show=False, **kwargs):
     """
