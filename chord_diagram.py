@@ -19,8 +19,8 @@ from .utilities import _get_normed_line, dist, polar2xy
 LW = 0.3
 
 
-def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0.03, chordwidth=0.7,
-                  ax=None, colors=None, cmap=None, alpha=0.7,
+def chord_diagram(mat, names=None, order=None, width=0.1, pad=2., gap=0.03,
+                  chordwidth=0.7, ax=None, colors=None, cmap=None, alpha=0.7,
                   use_gradient=False, show=False, **kwargs):
     """
     Plot a chord diagram.
@@ -30,7 +30,11 @@ def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0.03, chordwidth=0.7,
     mat : square matrix
         Flux data, mat[i, j] is the flux from i to j
     names : list of str, optional (default: no names)
-        Names of the nodes that will be displayed.
+        Names of the nodes that will be displayed (must be ordered as the
+        matrix entries).
+    order : list, optional (default: order of the matrix entries)
+        Order in which the arcs should be placed around the trigonometric
+        circle.
     width : float, optional (default: 0.1)
         Width/thickness of the ideogram arc.
     pad : float, optional (default: 2)
@@ -52,7 +56,9 @@ def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0.03, chordwidth=0.7,
         same color as the arc they belong to.
     **kwargs : keyword arguments
         Available kwargs are "fontsize" and "sort" (either "size" or
-        "distance"), "zero_entry_size" (in degrees, default: 0.5).
+        "distance"), "zero_entry_size" (in degrees, default: 0.5),
+        "rotate_names" (a bool or list of bools) to rotate (some of) the
+        names by 90°.
     """
     import matplotlib.pyplot as plt
 
@@ -86,6 +92,24 @@ def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0.03, chordwidth=0.7,
         for (i, j) in zeros:
             if mat[j, i] != 0:
                 mat[i, j] = min_deg
+
+    # check name rotations
+    rotate_names = kwargs.get("rotate_names", 0)
+
+    if isinstance(rotate_names, Sequence):
+        assert len(rotate_names) == num_nodes, \
+            "Wrong number of entries in 'rotate_names'."
+    else:
+        rotate_names = [rotate_names]*num_nodes
+
+    # check order
+    if order is not None:
+        mat = mat[order][:, order]
+
+        rotate_names = [rotate_names[i] for i in order]
+
+        if names is not None:
+            names = [names[i] for i in order]
 
     # sum over rows
     x = mat.sum(axis=1).A1 if is_sparse else mat.sum(axis=1)
@@ -130,7 +154,7 @@ def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0.03, chordwidth=0.7,
             angle -= 270
 
         nodePos.append(
-            tuple(polar2xy(1.1, 0.5*(start + end)*np.pi/180.)) + (angle,))
+            tuple(polar2xy(1.05, 0.5*(start + end)*np.pi/180.)) + (angle,))
 
         z = _get_normed_line(mat, i, x, start, end, is_sparse)
 
@@ -143,7 +167,8 @@ def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0.03, chordwidth=0.7,
             remainder = 0 if num_nodes % 2 else -1
 
             ids  = list(range(i - int(0.5*num_nodes), i))[::-1]
-            ids += list(range(i, i + int(0.5*num_nodes) + remainder + 1))
+            ids += [i]
+            ids += list(range(i + int(0.5*num_nodes) + remainder, i, -1))
 
             # put them back into [0, num_nodes[
             ids = np.array(ids)
@@ -191,11 +216,28 @@ def chord_diagram(mat, names=None, width=0.1, pad=2., gap=0.03, chordwidth=0.7,
         prop = {
             "fontsize": kwargs.get("fontsize", 16*0.8),
             "ha": "center",
-            "va": "center"
+            "va": "center",
         }
 
-        for pos, name in zip(nodePos, names):
-            ax.text(pos[0], pos[1], name, rotation=pos[2], **prop)
+        for i, (pos, name) in enumerate(zip(nodePos, names)):
+            rotate = rotate_names[i]
+            pp = prop.copy()
+
+            if rotate:
+                angle  = np.average(arc[i])
+                rotate = 90
+
+                if 90 < angle < 180 or 270 < angle:
+                    rotate = -90
+
+                if 90 < angle < 270:
+                    pp["ha"] = "right"
+                else:
+                    pp["ha"] = "left"
+
+                pp["rotation_mode"] = "anchor"
+
+            ax.text(pos[0], pos[1], name, rotation=pos[2] + rotate, **pp)
 
     # configure axis
     ax.set_xlim(-1.1, 1.1)

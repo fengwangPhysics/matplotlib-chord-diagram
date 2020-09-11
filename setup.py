@@ -82,3 +82,8 @@ finally:
             os.rename(directory + fname, fname)
         except:
             pass
+
+    try:
+        os.remove(directory)
+    except:
+        pass
