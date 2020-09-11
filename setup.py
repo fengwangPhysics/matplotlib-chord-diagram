@@ -1,5 +1,6 @@
 import os, errno
 from setuptools import setup, find_packages
+from shutil import rmtree
 
 
 # create directory
@@ -84,6 +85,6 @@ finally:
             pass
 
     try:
-        os.remove(directory)
+        rmtree(directory)
     except:
         pass
