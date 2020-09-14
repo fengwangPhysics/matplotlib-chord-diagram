@@ -96,11 +96,11 @@ def chord_diagram(mat, names=None, order=None, width=0.1, pad=2., gap=0.03,
     # check name rotations
     rotate_names = kwargs.get("rotate_names", 0)
 
-    if isinstance(rotate_names, Sequence):
+    if isinstance(rotate_names, (int, np.integer, float)):
+        rotate_names = [rotate_names]*num_nodes
+    else:
         assert len(rotate_names) == num_nodes, \
             "Wrong number of entries in 'rotate_names'."
-    else:
-        rotate_names = [rotate_names]*num_nodes
 
     # check order
     if order is not None:
@@ -445,9 +445,9 @@ def chord_arc(start1, end1, start2, end2, radius=1.0, pad=2, chordwidth=0.7,
 
     start2, end2, verts2, _ = initial_path(start2, end2, radius, chordwidth)
 
-    chordwidth2 *= np.clip(0.4 + (dtheta1 - 2*pad) / (15*pad), 0.4, 1)
+    chordwidth2 *= np.clip(0.4 + (dtheta1 - 2*pad) / (15*pad), 0.2, 1)
 
-    chordwidth *= np.clip(0.4 + (dtheta2 - 2*pad) / (15*pad), 0.4, 1)
+    chordwidth *= np.clip(0.4 + (dtheta2 - 2*pad) / (15*pad), 0.2, 1)
 
     rchord  = radius * (1-chordwidth)
     rchord2 = radius * (1-chordwidth2)
