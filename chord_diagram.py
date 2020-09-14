@@ -94,13 +94,13 @@ def chord_diagram(mat, names=None, order=None, width=0.1, pad=2., gap=0.03,
                 mat[i, j] = min_deg
 
     # check name rotations
-    rotate_names = kwargs.get("rotate_names", 0)
+    rotate_names = kwargs.get("rotate_names", False)
 
-    if isinstance(rotate_names, (int, np.integer, float)):
-        rotate_names = [rotate_names]*num_nodes
-    else:
+    if isinstance(rotate_names, Sequence):
         assert len(rotate_names) == num_nodes, \
             "Wrong number of entries in 'rotate_names'."
+    else:
+        rotate_names = [rotate_names]*num_nodes
 
     # check order
     if order is not None:
