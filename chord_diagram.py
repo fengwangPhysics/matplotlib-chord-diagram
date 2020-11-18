@@ -227,7 +227,7 @@ def chord_diagram(mat, names=None, order=None, width=0.1, pad=2., gap=0.03,
                 angle  = np.average(arc[i])
                 rotate = 90
 
-                if 90 < angle < 180 or 270 < angle:
+                if 90 < angle < 210 or 270 < angle:
                     rotate = -90
 
                 if 90 < angle < 270:
