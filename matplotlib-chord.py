@@ -6,7 +6,7 @@ import matplotlib.patches as patches
 
 import numpy as np
 
-LW = 0.3
+LW = 0
 
 def polar2xy(r, theta):
     return np.array([r*np.cos(theta), r*np.sin(theta)])
